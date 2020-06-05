@@ -172,5 +172,19 @@ func resourceOrderUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceOrderDelete(d *schema.ResourceData, m interface{}) error {
+	c := m.(*hc.Client)
+
+	orderID := d.Id()
+
+	err := c.DeleteOrder(orderID)
+	if err != nil {
+		return err
+	}
+
+	// d.SetId("") is automatically called assuming delete returns no errors, but
+	// it is added here for explicitness.
+
+	d.SetId("")
+
 	return nil
 }
