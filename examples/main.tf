@@ -1,3 +1,17 @@
+terraform {
+  required_providers {
+    hashicups = {
+      versions = ["0.2"]
+      source = "hashicorp.com/edu/hashicups"
+    }
+  }
+}
+
+provider "hashicups" {
+  username = "education"
+  password = "test123"
+}
+
 module "psl" {
   source = "./coffee"
 
