@@ -8,29 +8,11 @@ terraform {
 }
 
 provider "hashicups" {
-  username = "dos"
+  username = "education"
   password = "test123"
 }
 
-module "psl" {
-  source = "./coffee"
-
-  coffee_name = "Packer Spiced Latte"
-}
-
-output "psl" {
-  value = module.psl.coffee
-}
-
-data "hashicups_ingredients" "psl" {
-  coffee_id = values(module.psl.coffee)[0].id
-}
-
-# output "psl_i" {
-#   value = data.hashicups_ingredients.psl
-# }
-
-resource "hashicups_order" "new" {
+resource "hashicups_order" "edu" {
   items {
     coffee {
       id = 3
@@ -45,15 +27,6 @@ resource "hashicups_order" "new" {
   }
 }
 
-output "new_order" {
-  value = hashicups_order.new
-}
-
-
-data "hashicups_order" "first" {
-  id = 1
-}
-
-output "first_order" {
-  value = data.hashicups_order.first
+output "edu_order" {
+  value = hashicups_order.edu
 }
