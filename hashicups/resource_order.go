@@ -63,7 +63,7 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	// 3. Map the order schema.Resource to []hc.OrderItems{} if changes to "items" are detected
 
-	// 4. Invoke the UpdateOrder function on the HashiCups client
+	// 4. Invoke the UpdateOrder function on the HashiCups client (this should only be invoked when "items" has been changed)
 
 	// 5. Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
 	return resourceOrderRead(ctx, d, m)
