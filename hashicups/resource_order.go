@@ -2,6 +2,7 @@ package hashicups
 
 import (
 	"context"
+	"strconv"
 
 	hc "github.com/hashicorp-demoapp/hashicups-client-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -14,24 +15,73 @@ func resourceOrder() *schema.Resource {
 		ReadContext:   resourceOrderRead,
 		UpdateContext: resourceOrderUpdate,
 		DeleteContext: resourceOrderDelete,
-		Schema:        map[string]*schema.Schema{},
+		Schema: map[string]*schema.Schema{
+			"items": &schema.Schema{
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						// Define Coffee Schema
+						"coffee": &schema.Schema{
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Required: true,
+							Elem: &schema.Resource{
+								// ** | Coffee attributes
+								Schema: map[string]*schema.Schema{
+									
+								},
+							},
+						},
+						"quantity": &schema.Schema{
+							Type:     schema.TypeInt,
+							Required: true,
+						},
+					},
+				},
+			},
+		},
 	}
 }
 
 // resourceOrderCreate creates a new HashiCups order
 func resourceOrderCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// 1. Retrieve API client from meta parameter
+	// Retrieve API client from meta parameter
+	c := m.(*hc.Client)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	// 2. Map the order schema.Resource to []hc.OrderItems{}
+	// Map the order schema.Resource to []hc.OrderItems{}
+	items := d.Get("items").([]interface{})
+	ois := []hc.OrderItem{}
 
-	// 3. Invoke the CreateOrder function on the HashiCups client
+	for _, item := range items {
+		i := item.(map[string]interface{})
 
-	// 4. Set order ID as resource ID
+		co := i["coffee"].([]interface{})[0]
+		coffee := co.(map[string]interface{})
 
-	// 5. Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
+		oi := hc.OrderItem{
+			Coffee: hc.Coffee{
+				ID: coffee["id"].(int),
+			},
+			Quantity: i["quantity"].(int),
+		}
+
+		ois = append(ois, oi)
+	}
+
+	// Invoke the CreateOrder function on the HashiCups client
+	o, err := c.CreateOrder(ois)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	// ** | Set order ID as resource ID
+	d.SetId(strconv.Itoa(o.ID))
+
+	// Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
 	resourceOrderRead(ctx, d, m)
 
 	return diags
@@ -40,16 +90,26 @@ func resourceOrderCreate(ctx context.Context, d *schema.ResourceData, m interfac
 // resourceOrderRead retrieves information for the specified HashiCups order and
 // maps it to the order schema.Resource
 func resourceOrderRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// 1. Retrieve API client from meta parameter
+	// Retrieve API client from meta parameter
+	c := m.(*hc.Client)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	// 2. Retrieve order ID
+	// Retrieve order ID
+	orderID := d.Id()
 
-	// 3. Invoke the GetOrder function on the HashiCups client
+	// Invoke the GetOrder function on the HashiCups client
+	order, err := c.GetOrder(orderID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	// 4. Maps response (hc.Order) to order schema.Resource through flattening functions
+	// Maps response (hc.Order) to order schema.Resource through flattening functions
+	orderItems := flattenOrderItems(&order.Items)
+	if err := d.Set("items", orderItems); err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }
@@ -57,28 +117,45 @@ func resourceOrderRead(ctx context.Context, d *schema.ResourceData, m interface{
 // resourceOrderUpdate detects whether there is a difference between the state
 // and configuration. If there is, it will update the HashiCups order.
 func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// 1. Retrieve API client from meta parameter
+	// Retrieve API client from meta parameter
+	c := m.(*hc.Client)
 
-	// 2. Retrieve order ID
+	// Retrieve order ID
 
-	// 3. Map the order schema.Resource to []hc.OrderItems{} if changes to "items" are detected
+	// Detect whether "items" has been changed
+	if d.HasChange("items") {
+		items := d.Get("items").([]interface{})
+		ois := []hc.OrderItem{}
 
-	// 4. Invoke the UpdateOrder function on the HashiCups client (this should only be invoked when "items" has been changed)
+		// ** | Map the order schema.Resource to []hc.OrderItems{}
 
-	// 5. Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
+		// Invoke the UpdateOrder function on the HashiCups client (this should only be invoked when "items" has been changed)
+		_, err := c.UpdateOrder(orderID, ois)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	// Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
 	return resourceOrderRead(ctx, d, m)
 }
 
 // resourceOrderDelete deletes the specified HashiCups order
 func resourceOrderDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	// 1. Retrieve API client from meta parameter
+	// Retrieve API client from meta parameter
+	c := m.(*hc.Client)
 
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	// 2. Retrieve order ID
+	// Retrieve order ID
+	orderID := d.Id()
 
-	// 3. Invoke the UpdateOrder function on the HashiCups client
+	// Invoke the UpdateOrder function on the HashiCups client
+	err := c.DeleteOrder(orderID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	return diags
 }
@@ -88,6 +165,21 @@ func resourceOrderDelete(ctx context.Context, d *schema.ResourceData, m interfac
 // can be used to map hc.Coffee to a []inferface{}
 // If orderItems is empty, the function should return an empty []interface{}
 func flattenOrderItems(orderItems *[]hc.OrderItem) []interface{} {
+	if orderItems != nil {
+		ois := make([]interface{}, len(*orderItems), len(*orderItems))
+
+		for i, orderItem := range *orderItems {
+			oi := make(map[string]interface{})
+
+			oi["coffee"] = flattenCoffee(orderItem.Coffee)
+			oi["quantity"] = orderItem.Quantity
+
+			ois[i] = oi
+		}
+
+		return ois
+	}
+
 	return make([]interface{}, 0)
 }
 
@@ -97,5 +189,9 @@ func flattenOrderItems(orderItems *[]hc.OrderItem) []interface{} {
 //
 // This approach was taken because you cannot currently nest objects in schema.Schema
 func flattenCoffee(coffee hc.Coffee) []interface{} {
-	return make([]interface{}, 0)
+	c := make(map[string]interface{})
+
+	// ** | Map Coffee attributes
+
+	return []interface{}{c}
 }
