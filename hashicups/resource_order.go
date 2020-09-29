@@ -29,7 +29,7 @@ func resourceOrder() *schema.Resource {
 							Elem: &schema.Resource{
 								// ** | Coffee attributes
 								Schema: map[string]*schema.Schema{
-									
+
 								},
 							},
 						},
@@ -79,8 +79,8 @@ func resourceOrderCreate(ctx context.Context, d *schema.ResourceData, m interfac
 	}
 
 	// ** | Set order ID as resource ID
-	d.SetId(strconv.Itoa(o.ID))
 
+	
 	// Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
 	resourceOrderRead(ctx, d, m)
 
@@ -128,6 +128,7 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		ois := []hc.OrderItem{}
 
 		// ** | Map the order schema.Resource to []hc.OrderItems{}
+
 
 		// Invoke the UpdateOrder function on the HashiCups client (this should only be invoked when "items" has been changed)
 		_, err := c.UpdateOrder(orderID, ois)
