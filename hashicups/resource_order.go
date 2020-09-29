@@ -21,11 +21,13 @@ func resourceOrder() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						// Define Coffee Schema
 						"coffee": &schema.Schema{
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Required: true,
 							Elem: &schema.Resource{
+								// ** | Coffee attributes
 								Schema: map[string]*schema.Schema{
 									"id": &schema.Schema{
 										Type:     schema.TypeInt,
@@ -99,7 +101,7 @@ func resourceOrderCreate(ctx context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 
-	// Set order ID as resource ID
+	// ** | Set order ID as resource ID
 	d.SetId(strconv.Itoa(o.ID))
 
 	// Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
@@ -144,11 +146,12 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	// Retrieve order ID
 	orderID := d.Id()
 
-	// Map the order schema.Resource to []hc.OrderItems{} if changes to "items" are detected
+	// Detect whether "items" has been changed
 	if d.HasChange("items") {
 		items := d.Get("items").([]interface{})
 		ois := []hc.OrderItem{}
-
+		
+		// ** | Map the order schema.Resource to []hc.OrderItems{}
 		for _, item := range items {
 			i := item.(map[string]interface{})
 
@@ -225,12 +228,8 @@ func flattenOrderItems(orderItems *[]hc.OrderItem) []interface{} {
 // This approach was taken because you cannot currently nest objects in schema.Schema
 func flattenCoffee(coffee hc.Coffee) []interface{} {
 	c := make(map[string]interface{})
-	c["id"] = coffee.ID
-	c["name"] = coffee.Name
-	c["teaser"] = coffee.Teaser
-	c["description"] = coffee.Description
-	c["price"] = coffee.Price
-	c["image"] = coffee.Image
+	
+	// ** | Map Coffee attributes
 
 	return []interface{}{c}
 }
