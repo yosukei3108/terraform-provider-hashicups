@@ -31,6 +31,7 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			// Add HashiCups order here
+			"hashicups_order": resourceOrder(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hashicups_coffees":     dataSourceCoffees(),
