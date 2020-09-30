@@ -117,6 +117,7 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	c := m.(*hc.Client)
 
 	// Retrieve order ID
+	orderID := d.Id()
 
 	// Detect whether "items" has been changed
 	if d.HasChange("items") {
