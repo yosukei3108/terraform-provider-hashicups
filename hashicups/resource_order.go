@@ -46,7 +46,7 @@ func resourceOrder() *schema.Resource {
 										Computed: true,
 									},
 									"price": &schema.Schema{
-										Type:     schema.TypeInt,
+										Type:     schema.TypeFloat,
 										Computed: true,
 									},
 									"image": &schema.Schema{
@@ -150,7 +150,7 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 	if d.HasChange("items") {
 		items := d.Get("items").([]interface{})
 		ois := []hc.OrderItem{}
-		
+
 		// ** | Map the order schema.Resource to []hc.OrderItems{}
 		for _, item := range items {
 			i := item.(map[string]interface{})
@@ -228,8 +228,14 @@ func flattenOrderItems(orderItems *[]hc.OrderItem) []interface{} {
 // This approach was taken because you cannot currently nest objects in schema.Schema
 func flattenCoffee(coffee hc.Coffee) []interface{} {
 	c := make(map[string]interface{})
-	
+
 	// ** | Map Coffee attributes
+	c["id"] = coffee.ID
+	c["name"] = coffee.Name
+	c["teaser"] = coffee.Teaser
+	c["description"] = coffee.Description
+	c["price"] = coffee.Price
+	c["image"] = coffee.Image
 
 	return []interface{}{c}
 }
