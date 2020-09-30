@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.3"
 services:
   api:
     image: "hashicorpdemoapp/product-api:v4280cf7"
@@ -7,7 +7,7 @@ services:
     volumes:
       - ${PWD}/conf.json:/config/config.json
     environment:
-      CONFIG_FILE: '/config/config.json'
+      CONFIG_FILE: "/config/config.json"
     depends_on:
       - db
   db:
@@ -15,6 +15,6 @@ services:
     ports:
       - "15432:5432"
     environment:
-      POSTGRES_DB: 'products'
-      POSTGRES_USER: 'postgres'
-      POSTGRES_PASSWORD: 'password'
+      POSTGRES_DB: "products"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "password"
