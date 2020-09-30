@@ -2,7 +2,6 @@ package hashicups
 
 import (
 	"context"
-	"strconv"
 
 	hc "github.com/hashicorp-demoapp/hashicups-client-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -21,6 +20,10 @@ func resourceOrder() *schema.Resource {
 				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"quantity": &schema.Schema{
+							Type:     schema.TypeInt,
+							Required: true,
+						},
 						// Define Coffee Schema
 						"coffee": &schema.Schema{
 							Type:     schema.TypeList,
@@ -28,14 +31,8 @@ func resourceOrder() *schema.Resource {
 							Required: true,
 							Elem: &schema.Resource{
 								// ** | Coffee attributes
-								Schema: map[string]*schema.Schema{
-
-								},
+								Schema: map[string]*schema.Schema{},
 							},
-						},
-						"quantity": &schema.Schema{
-							Type:     schema.TypeInt,
-							Required: true,
 						},
 					},
 				},
@@ -80,7 +77,6 @@ func resourceOrderCreate(ctx context.Context, d *schema.ResourceData, m interfac
 
 	// ** | Set order ID as resource ID
 
-	
 	// Map response (hc.Order) to order schema.Resource (done through resourceOrderRead)
 	resourceOrderRead(ctx, d, m)
 
@@ -128,7 +124,6 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 		ois := []hc.OrderItem{}
 
 		// ** | Map the order schema.Resource to []hc.OrderItems{}
-
 
 		// Invoke the UpdateOrder function on the HashiCups client (this should only be invoked when "items" has been changed)
 		_, err := c.UpdateOrder(orderID, ois)
