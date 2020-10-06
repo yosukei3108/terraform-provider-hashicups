@@ -2,6 +2,7 @@ package hashicups
 
 import (
 	"context"
+	// ** | Add "strconv" package
 	"strconv"
 
 	hc "github.com/hashicorp-demoapp/hashicups-client-go"
