@@ -1,8 +1,8 @@
 terraform {
   required_providers {
     hashicups = {
-      versions = ["0.2"]
-      source = "hashicorp.com/edu/hashicups"
+      version = "0.2"
+      source  = "hashicorp.com/edu/hashicups"
     }
   }
 }
@@ -26,4 +26,23 @@ output "coffee" {
     coffee.id => coffee
     if coffee.name == var.coffee_name
   }
+}
+
+resource "hashicups_order" "edu" {
+  items {
+    coffee {
+      id = 3
+    }
+    quantity = 2
+  }
+  items {
+    coffee {
+      id = 2
+    }
+    quantity = 2
+  }
+}
+
+output "edu_order" {
+  value = hashicups_order.edu
 }
