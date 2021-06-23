@@ -34,8 +34,8 @@ install: build
 instruqt_install: build
 	touch examples/.terraform.lock.hcl
 	rm examples/.terraform.lock.hcl
-	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${PROVIDER_VERSION}/${OS_ARCH}
-	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${PROVIDER_VERSION}/${OS_ARCH}
+	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test:
 	go test -i $(TEST) || exit 1
