@@ -158,7 +158,7 @@ func resourceOrderUpdate(ctx context.Context, d *schema.ResourceData, m interfac
 			return diag.FromErr(err)
 		}
 
-		d.Set("last_updated", time.Now().Format(time.RFC850))
+		d.Set("last_updated", string(time.Now().Format(time.RFC850)))
 	}
 
 	return resourceOrderRead(ctx, d, m)
